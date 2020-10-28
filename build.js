@@ -6,7 +6,7 @@ const remToPx = value => `${Number.parseFloat(value) * 16}px`;
 
 const getStyles = rule => {
 	const styles = rule.declarations
-		.filter(({property, value}) => {
+		.filter(({ property, value }) => {
 			// Skip line-height utilities without units
 			if (property === 'line-height' && !value.endsWith('rem')) {
 				return false;
@@ -14,7 +14,7 @@ const getStyles = rule => {
 
 			return true;
 		})
-		.map(({property, value}) => {
+		.map(({ property, value }) => {
 			if (value.endsWith('rem')) {
 				return [property, remToPx(value)];
 			}
@@ -49,6 +49,7 @@ const supportedUtilities = [
 	/^(p.?-\d+|p.?-px)/,
 	// Margin
 	/^-?(m.?-\d+|m.?-px)/,
+	/^m.-auto$/,
 	// Width
 	/^w-(\d|\/)+|^w-px|^w-full/,
 	// Height
@@ -73,7 +74,7 @@ const supportedUtilities = [
 	'capitalize',
 	'normal-case',
 	// Background color
-	/^bg-(transparent|black|white|gray|red|orange|yellow|green|teal|blue|indigo|purple|pink)/,
+	/^bg-[a-z]+/,
 	// Background opacity
 	/^bg-opacity-/,
 	// Border color, style, width, radius, opacity
@@ -81,7 +82,7 @@ const supportedUtilities = [
 	// Opacity
 	/^opacity-/,
 	// Pointer events
-	/^pointer-events-/
+	/^pointer-events-/,
 ];
 
 const isUtilitySupported = utility => {
@@ -89,7 +90,7 @@ const isUtilitySupported = utility => {
 	// Skip utilities with vh units
 	if (
 		['border-current', 'text-current', 'max-h-screen', 'min-h-screen'].includes(
-			utility
+			utility,
 		)
 	) {
 		return false;
@@ -109,7 +110,7 @@ const isUtilitySupported = utility => {
 };
 
 module.exports = source => {
-	const {stylesheet} = css.parse(source);
+	const { stylesheet } = css.parse(source);
 
 	// Mapping of Tailwind class names to React Native styles
 	const styles = {};
@@ -127,9 +128,31 @@ module.exports = source => {
 	}
 
 	// Additional styles that we're not able to parse correctly automatically
-	styles.underline = {textDecorationLine: 'underline'};
-	styles['line-through'] = {textDecorationLine: 'line-through'};
-	styles['no-underline'] = {textDecorationLine: 'none'};
+	styles.underline = { textDecorationLine: 'underline' };
+	styles['line-through'] = { textDecorationLine: 'line-through' };
+	styles['no-underline'] = { textDecorationLine: 'none' };
+
+	styles['shadow'] = {
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 1,
+		},
+		shadowOpacity: 0.16,
+		shadowRadius: 2.22,
+		elevation: 3,
+	};
+
+	styles['shadow-lg'] = {
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	};
 
 	return styles;
 };
